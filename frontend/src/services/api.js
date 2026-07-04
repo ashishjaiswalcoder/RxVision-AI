@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const raw_api_base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE = raw_api_base.endsWith('/api') ? raw_api_base : `${raw_api_base.replace(/\/$/, '')}/api`;
 
 export async function uploadPrescription(file) {
   const form = new FormData();
