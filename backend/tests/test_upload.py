@@ -76,3 +76,26 @@ def test_upload_empty_ocr(monkeypatch):
     assert "No text could be extracted" in data["message"]
     assert data["raw_texts"] == []
     assert data["matches"] == []
+
+
+def test_upload_image_with_metadata():
+    # Create an image with prescription text in PNG metadata
+    from PIL import PngImagePlugin
+    img = Image.new("RGB", (100, 100), color="white")
+    meta = PngImagePlugin.PngInfo()
+    meta.add_text("prescription_text", "Dolo 650, Azithral 500")
+
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format="PNG", pnginfo=meta)
+    img_byte_arr.seek(0)
+
+    files = {"file": ("test_metadata.png", img_byte_arr.read(), "image/png")}
+
+    response = client.post("/api/upload", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    # It should have extracted the exact text from the PNG info
+    assert "Dolo 650" in data["raw_texts"]
+    assert "Azithral 500" in data["raw_texts"]
+    assert len(data["matches"]) >= 2
