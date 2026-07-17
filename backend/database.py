@@ -8,6 +8,7 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'medi
 @contextmanager
 def get_db():
     """Context manager for database connections."""
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     try:
@@ -403,6 +404,14 @@ def seed_medicines():
                VALUES (?, ?, ?, ?, ?)''',
             medicines
         )
+
+
+# Auto-initialize and seed the database on import
+try:
+    init_db()
+    seed_medicines()
+except Exception:
+    pass
 
 
 def get_all_medicines() -> list:

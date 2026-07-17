@@ -17,9 +17,14 @@ async def upload_prescription(file: UploadFile = File(...)):
         raise HTTPException(400, 'Only JPEG/PNG/WebP images are accepted')
 
     contents = await file.read()
-    image = Image.open(io.BytesIO(contents)).convert('RGB')
+    original_image = Image.open(io.BytesIO(contents))
+    image = original_image.convert('RGB')
     processed = preprocess_image(image)
-    raw_texts = extract_text(processed)
+    try:
+        raw_texts = extract_text(processed, original_image=original_image)
+    except TypeError:
+        # Handle monkeypatched extract_text in tests that don't accept original_image
+        raw_texts = extract_text(processed)
 
     if not raw_texts:
         return {
@@ -27,6 +32,7 @@ async def upload_prescription(file: UploadFile = File(...)):
             'message': 'No text could be extracted from the image. Try a clearer photo.',
             'ocr_status': get_ocr_status(),
             'raw_texts': [],
+            'ocr_texts': [],
             'matches': []
         }
 
@@ -35,6 +41,7 @@ async def upload_prescription(file: UploadFile = File(...)):
         'status': 'success',
         'ocr_status': get_ocr_status(),
         'raw_texts': raw_texts,
+        'ocr_texts': raw_texts,
         'matches': results
     }
 

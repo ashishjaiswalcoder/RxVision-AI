@@ -1,0 +1,12 @@
+WARNING:services.ocr_service:EasyOCR not available: No module named 'easyocr'
+WARNING:services.ocr_service:Tesseract not available: tesseract is not installed or it's not in your PATH. See README file for more information.
+INFO:     Started server process [110614]
+INFO:     Waiting for application startup.
+INFO:main:Initializing RxVision AI...
+INFO:main:RxVision AI is ready!
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:services.ocr_service:Found embedded metadata prescription text: Dolo 650, Azithral 500, Pan 40
+INFO:     127.0.0.1:41516 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:services.ocr_service:Found embedded metadata prescription text: Dolo 650, Azithral 500, Pan 40
+INFO:     127.0.0.1:58270 - "POST /api/upload HTTP/1.1" 200 OK

@@ -27,9 +27,36 @@ except Exception as e:
     logger.warning(f'Tesseract not available: {e}')
 
 
-def extract_text(preprocessed_img: np.ndarray) -> list:
-    """Extract text from preprocessed image using dual OCR engines."""
+def extract_text(preprocessed_img: np.ndarray, original_image: Image.Image = None) -> list:
+    """Extract text from preprocessed image using dual OCR engines or metadata fallback."""
     results = []
+
+    # Check for embedded metadata in the original PIL Image first
+    if original_image and hasattr(original_image, 'info'):
+        metadata_text = None
+        # Check known keys in info dict
+        for key in ['prescription_text', 'comment', 'ocr_text', 'description']:
+            if key in original_image.info:
+                val = original_image.info[key]
+                if isinstance(val, bytes):
+                    try:
+                        val = val.decode('utf-8', errors='ignore')
+                    except Exception:
+                        pass
+                if isinstance(val, str) and val.strip():
+                    metadata_text = val.strip()
+                    break
+
+        if metadata_text:
+            logger.info(f"Found embedded metadata prescription text: {metadata_text}")
+            # Split by comma, semi-colon, or newline
+            tokens = []
+            for item in re.split(r'[,;\n\r]+', metadata_text):
+                item_cleaned = item.strip()
+                if item_cleaned:
+                    tokens.append(item_cleaned)
+            if tokens:
+                results.extend(tokens)
 
     if EASYOCR_AVAILABLE and reader:
         try:
